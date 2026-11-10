@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مغامرة دبدوب لابوبو السحري - Top Goal 3 & Super Goal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Confetti Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Cairo & Fredoka -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Fredoka:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+            fredoka: ['Fredoka', 'sans-serif']
+          },
+          colors: {
+            brandPink: {
+              50: '#fff1f6',
+              100: '#ffe4ee',
+              200: '#fecddf',
+              300: '#fda4c5',
+              400: '#fb719f',
+              500: '#f43f7d',
+              600: '#e11d67',
+              700: '#be1254'
+            },
+            pastelPurple: '#8b5cf6',
+            pastelTeal: '#06b6d4',
+            sunnyGold: '#f59e0b'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: radial-gradient(circle at 10% 20%, #fff1f8 0%, #f3e8ff 45%, #ecfeff 90%);
+      min-height: 100vh;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* 3D Card Animation Styles */
+    .card-scene {
+      perspective: 900px;
+    }
+    .card-object {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .card-flipped {
+      transform: rotateY(180deg);
+    }
+    .card-side {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 1rem;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Teddy Bear Pieces Styling */
+    .piece-locked {
+      fill: #e2e8f0 !important;
+      stroke: #cbd5e1 !important;
+      opacity: 0.38;
+      stroke-dasharray: 4 4;
+      transition: all 0.5s ease;
+    }
+    .piece-unlocked {
+      transition: all 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-origin: center;
+    }
+
+    @keyframes starGlow {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(244, 63, 125, 0.5)); }
+      50% { filter: drop-shadow(0 0 16px rgba(236, 72, 153, 0.95)); }
+    }
+    .active-glow {
+      animation: starGlow 2.2s infinite ease-in-out;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #f472b6;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="text-slate-800 p-2 sm:p-4 md:p-6 overflow-x-hidden">
+
+  <!-- Main Game Header -->
+  <header class="max-w-7xl mx-auto mb-4 bg-white/85 backdrop-blur-md rounded-3xl p-4 shadow-xl border-2 border-pink-100 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-14 h-14 bg-gradient-to-tr from-pink-500 via-rose-400 to-amber-300 rounded-2xl flex items-center justify-center text-white text-3xl shadow-lg transform -rotate-3 hover:rotate-0 transition">
+        🧸
+      </div>
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 class="text-lg sm:text-2xl font-black text-pink-600">مغامرة دبدوب لابوبو الذكي</h1>
+          <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
+            Top Goal 3 & Super Goal
+          </span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5">
+          36 كارت سحري! اجمعي 15 قطعة لتكتمل دمية اللابوبو الفاخرة وتفوزي باللعبة ✨
+        </p>
+      </div>
+    </div>
+
+    <!-- Live Status Indicators -->
+    <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+      <!-- Shield Badge -->
+      <div id="shieldBadge" class="hidden items-center gap-1.5 bg-sky-100 border-2 border-sky-300 text-sky-800 px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-bold shadow-sm">
+        <i class="fa-solid fa-shield-halved text-sky-500 animate-pulse text-base"></i>
+        <span>درع الحماية جاهز</span>
+      </div>
+
+      <!-- Active Judgment / Rule Tracker -->
+      <div id="ruleBadge" class="hidden items-center gap-1.5 bg-amber-100 border-2 border-amber-300 text-amber-900 px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-bold shadow-sm">
+        <i class="fa-solid fa-scale-balanced text-amber-600"></i>
+        <span id="ruleBadgeText">حكم نشط</span>
+      </div>
+
+      <!-- Pieces Counter -->
+      <div class="bg-pink-50/90 border-2 border-pink-200 px-4 py-2 rounded-2xl flex items-center gap-3 shadow-inner">
+        <div class="text-right">
+          <div class="text-[10px] text-pink-500 font-extrabold uppercase">قطع اللابوبو</div>
+          <div class="text-lg sm:text-2xl font-black text-pink-600 font-fredoka flex items-baseline gap-1">
+            <span id="piecesCount">0</span>
+            <span class="text-xs text-pink-400 font-normal">/ 15</span>
+          </div>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-rose-400 text-white flex items-center justify-center font-bold text-base shadow">
+          <i class="fa-solid fa-puzzle-piece"></i>
+        </div>
+      </div>
+
+      <!-- Reset Game -->
+      <button onclick="resetGame()" class="bg-slate-100 hover:bg-pink-100 text-slate-600 hover:text-pink-600 p-3 rounded-2xl transition shadow-sm font-bold active:scale-95" title="إعادة تشغيل اللعبة">
+        <i class="fa-solid fa-arrow-rotate-right text-lg"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Interactive Dashboard: Left Teddy Canvas & Right 6x6 Cards (36 Cards) -->
+  <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+    
+    <!-- LEFT COLUMN: Teddy Bear Puzzle (15 SVG Pieces) -->
+    <section class="lg:col-span-5 bg-white/90 backdrop-blur-md rounded-3xl p-5 shadow-xl border-2 border-pink-200 flex flex-col items-center">
+      <div class="w-full flex items-center justify-between mb-2">
+        <h2 class="text-base sm:text-lg font-black text-purple-700 flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-pink-500"></i>
+          <span>لوحة تركيب الدبدوب (15 جزء بدقة)</span>
+        </h2>
+        <span id="progressPercent" class="text-xs bg-pink-100 text-pink-700 px-3 py-1 rounded-full font-bold">0% مكتمل</span>
+      </div>
+
+      <!-- Dynamic Progress Bar -->
+      <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-3 border border-pink-100">
+        <div id="puzzleProgressBar" class="h-full bg-gradient-to-r from-pink-400 via-purple-400 to-rose-500 rounded-full transition-all duration-700" style="width: 0%"></div>
+      </div>
+
+      <!-- SVG Canvas for the 15 Parts -->
+      <div class="relative w-full max-w-[340px] sm:max-w-[380px] aspect-[4/5] bg-gradient-to-b from-rose-50/60 via-purple-50/40 to-pink-50/60 rounded-3xl p-2 flex items-center justify-center border-2 border-pink-100 shadow-inner">
+        <svg id="teddySvg" viewBox="0 0 400 480" class="w-full h-full drop-shadow-md select-none">
+          <defs>
+            <linearGradient id="furGradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ff90b7" />
+              <stop offset="100%" stop-color="#ff4785" />
+            </linearGradient>
+            <linearGradient id="innerEarGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffe4ee" />
+              <stop offset="100%" stop-color="#fca5c6" />
+            </linearGradient>
+            <linearGradient id="goldCrown" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fef08a" />
+              <stop offset="50%" stop-color="#facc15" />
+              <stop offset="100%" stop-color="#ca8a04" />
+            </linearGradient>
+            <linearGradient id="ribbonGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#c084fc" />
+              <stop offset="100%" stop-color="#7e22ce" />
+            </linearGradient>
+            <linearGradient id="bellyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fff5f8" />
+              <stop offset="100%" stop-color="#fed7e2" />
+            </linearGradient>
+          </defs>
+
+          <!-- 1. Right Ear Outer -->
+          <path id="part-1" class="piece-locked" fill="url(#furGradient)" stroke="#e11d48" stroke-width="3.5"
+                d="M 285,120 C 320,60 360,95 330,150 C 315,180 280,165 285,120 Z" />
+          <text id="label-1" x="312" y="122" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">1</text>
+
+          <!-- 2. Right Ear Inner -->
+          <ellipse id="part-2" class="piece-locked" fill="url(#innerEarGrad)" stroke="#fb7185" stroke-width="2"
+                   cx="308" cy="130" rx="14" ry="22" transform="rotate(22 308 130)" />
+          <text id="label-2" x="308" y="134" font-size="11" font-weight="bold" fill="#64748b" text-anchor="middle">2</text>
+
+          <!-- 3. Left Ear Outer -->
+          <path id="part-3" class="piece-locked" fill="url(#furGradient)" stroke="#e11d48" stroke-width="3.5"
+                d="M 115,120 C 80,60 40,95 70,150 C 85,180 120,165 115,120 Z" />
+          <text id="label-3" x="88" y="122" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">3</text>
+
+          <!-- 4. Left Ear Inner -->
+          <ellipse id="part-4" class="piece-locked" fill="url(#innerEarGrad)" stroke="#fb7185" stroke-width="2"
+                   cx="92" cy="130" rx="14" ry="22" transform="rotate(-22 92 130)" />
+          <text id="label-4" x="92" y="134" font-size="11" font-weight="bold" fill="#64748b" text-anchor="middle">4</text>
+
+          <!-- 5. Head & Rosy Cheeks -->
+          <g id="part-5" class="piece-locked">
+            <circle cx="200" cy="175" r="95" fill="url(#furGradient)" stroke="#be1254" stroke-width="4.5" />
+            <!-- Soft blush cheeks -->
+            <ellipse cx="140" cy="195" rx="14" ry="8" fill="#f43f5e" opacity="0.45" />
+            <ellipse cx="260" cy="195" rx="14" ry="8" fill="#f43f5e" opacity="0.45" />
+            <text id="label-5" x="200" y="120" font-size="17" font-weight="bold" fill="#64748b" text-anchor="middle">5</text>
+          </g>
+
+          <!-- 6. Cute Big Anime Eyes & Eyelashes (Labubu style) -->
+          <g id="part-6" class="piece-locked">
+            <!-- Left Eye -->
+            <ellipse cx="158" cy="165" rx="13" ry="17" fill="#1e1b4b" />
+            <circle cx="154" cy="158" r="5" fill="#ffffff" />
+            <circle cx="163" cy="172" r="2.5" fill="#ffffff" />
+            <path d="M 144,150 Q 156,142 168,150" stroke="#1e1b4b" stroke-width="3" stroke-linecap="round" fill="none" />
+            <!-- Right Eye -->
+            <ellipse cx="242" cy="165" rx="13" ry="17" fill="#1e1b4b" />
+            <circle cx="238" cy="158" r="5" fill="#ffffff" />
+            <circle cx="247" cy="172" r="2.5" fill="#ffffff" />
+            <path d="M 232,150 Q 244,142 256,150" stroke="#1e1b4b" stroke-width="3" stroke-linecap="round" fill="none" />
+            <text id="label-6" x="200" y="160" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">6</text>
+          </g>
+
+          <!-- 7. Sweet Snout, Nose & Smile -->
+          <g id="part-7" class="piece-locked">
+            <ellipse cx="200" cy="205" rx="38" ry="25" fill="#fff7f9" stroke="#fda4af" stroke-width="2.5" />
+            <!-- Pink Nose -->
+            <polygon points="193,195 207,195 200,204" fill="#fb7185" />
+            <!-- Playful Labubu grin with teeth -->
+            <path d="M 190,210 Q 200,222 210,210" stroke="#fb7185" stroke-width="2.5" fill="#ffe4e6" />
+            <line x1="195" y1="210" x2="195" y2="214" stroke="#ffffff" stroke-width="2" />
+            <line x1="205" y1="210" x2="205" y2="214" stroke="#ffffff" stroke-width="2" />
+            <text id="label-7" x="200" y="222" font-size="12" font-weight="bold" fill="#64748b" text-anchor="middle">7</text>
+          </g>
+
+          <!-- 8. Main Fluffy Body -->
+          <path id="part-8" class="piece-locked" fill="url(#furGradient)" stroke="#be1254" stroke-width="4.5"
+                d="M 140,250 C 115,290 105,345 135,395 C 150,425 250,425 265,395 C 295,345 285,290 260,250 Z" />
+          <text id="label-8" x="200" y="325" font-size="17" font-weight="bold" fill="#64748b" text-anchor="middle">8</text>
+
+          <!-- 9. Fluffy Belly Badge with Golden Star Heart -->
+          <g id="part-9" class="piece-locked">
+            <ellipse cx="200" cy="340" rx="46" ry="52" fill="url(#bellyGrad)" stroke="#f472b6" stroke-width="3" />
+            <!-- Golden Little Star Heart -->
+            <path d="M 200,345 C 200,345 190,335 185,342 C 180,350 190,358 200,366 C 210,358 220,350 215,342 C 210,335 200,345 200,345 Z" fill="#ec4899" />
+            <circle cx="200" cy="345" r="4" fill="#fbbf24" />
+            <text id="label-9" x="200" y="330" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">9</text>
+          </g>
+
+          <!-- 10. Right Arm with Friendship Bracelet -->
+          <g id="part-10" class="piece-locked">
+            <path fill="url(#furGradient)" stroke="#e11d48" stroke-width="3.5"
+                  d="M 135,260 C 95,275 68,320 85,350 C 96,365 120,360 130,330 C 138,305 142,280 135,260 Z" />
+            <!-- Bracelet -->
+            <ellipse cx="98" cy="342" rx="10" ry="4" fill="#38bdf8" stroke="#0284c7" stroke-width="1.5" transform="rotate(-30 98 342)" />
+            <text id="label-10" x="100" y="320" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">10</text>
+          </g>
+
+          <!-- 11. Left Arm waving cheerful hello -->
+          <g id="part-11" class="piece-locked">
+            <path fill="url(#furGradient)" stroke="#e11d48" stroke-width="3.5"
+                  d="M 265,260 C 305,275 332,320 315,350 C 304,365 280,360 270,330 C 262,305 258,280 265,260 Z" />
+            <ellipse cx="302" cy="342" rx="10" ry="4" fill="#fbbf24" stroke="#d97706" stroke-width="1.5" transform="rotate(30 302 342)" />
+            <text id="label-11" x="300" y="320" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">11</text>
+          </g>
+
+          <!-- 12. Right Paw / Foot with cute pads -->
+          <g id="part-12" class="piece-locked">
+            <ellipse cx="145" cy="425" rx="34" ry="24" fill="url(#furGradient)" stroke="#be1254" stroke-width="3.5" />
+            <ellipse cx="145" cy="425" rx="19" ry="13" fill="#ffe4e6" />
+            <circle cx="132" cy="413" r="3.5" fill="#fb7185" />
+            <circle cx="145" cy="410" r="4" fill="#fb7185" />
+            <circle cx="158" cy="413" r="3.5" fill="#fb7185" />
+            <text id="label-12" x="145" y="440" font-size="12" font-weight="bold" fill="#64748b" text-anchor="middle">12</text>
+          </g>
+
+          <!-- 13. Left Paw / Foot with cute pads -->
+          <g id="part-13" class="piece-locked">
+            <ellipse cx="255" cy="425" rx="34" ry="24" fill="url(#furGradient)" stroke="#be1254" stroke-width="3.5" />
+            <ellipse cx="255" cy="425" rx="19" ry="13" fill="#ffe4e6" />
+            <circle cx="242" cy="413" r="3.5" fill="#fb7185" />
+            <circle cx="255" cy="410" r="4" fill="#fb7185" />
+            <circle cx="268" cy="413" r="3.5" fill="#fb7185" />
+            <text id="label-13" x="255" y="440" font-size="12" font-weight="bold" fill="#64748b" text-anchor="middle">13</text>
+          </g>
+
+          <!-- 14. Royal Velvet Ribbon / Bowtie -->
+          <g id="part-14" class="piece-locked">
+            <path d="M 200,250 L 165,236 L 165,264 Z" fill="url(#ribbonGrad)" stroke="#581c87" stroke-width="2" />
+            <path d="M 200,250 L 235,236 L 235,264 Z" fill="url(#ribbonGrad)" stroke="#581c87" stroke-width="2" />
+            <circle cx="200" cy="250" r="8" fill="#facc15" stroke="#ca8a04" stroke-width="2" />
+            <text id="label-14" x="200" y="275" font-size="12" font-weight="bold" fill="#64748b" text-anchor="middle">14</text>
+          </g>
+
+          <!-- 15. Sparkly Princess Tiara / Crown -->
+          <g id="part-15" class="piece-locked">
+            <polygon points="170,85 180,105 200,74 220,105 230,85 225,115 175,115" fill="url(#goldCrown)" stroke="#a16207" stroke-width="2.5" />
+            <circle cx="170" cy="85" r="3.5" fill="#ec4899" />
+            <circle cx="200" cy="74" r="5" fill="#a855f7" />
+            <circle cx="230" cy="85" r="3.5" fill="#ec4899" />
+            <circle cx="200" cy="103" r="3.5" fill="#38bdf8" />
+            <text id="label-15" x="200" y="98" font-size="11" font-weight="bold" fill="#713f12" text-anchor="middle">15</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Motivation Footer -->
+      <div class="mt-4 p-3 bg-pink-50/70 border border-pink-200 rounded-2xl w-full text-center">
+        <p id="puzzleHint" class="text-xs sm:text-sm text-pink-700 font-bold">
+          ✨ اختاري كارت من شبكة الـ 36 كارت السحرية لكشف المفاجآت وتركيب الدمية!
+        </p>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: 36 Cards Interactive Grid (6 x 6) -->
+    <section class="lg:col-span-7 bg-white/90 backdrop-blur-md rounded-3xl p-4 sm:p-5 shadow-xl border-2 border-pink-100 flex flex-col">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div>
+          <h2 class="text-base sm:text-lg font-black text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-layer-group text-purple-600"></i>
+            <span>شبكة الكروت الـ 36 السحرية (6×6)</span>
+          </h2>
+          <p class="text-xs text-slate-500 font-semibold">اضغطي على أي بطاقة لتكتشفي ما تخبئه لكِ</p>
+        </div>
+
+        <!-- Legend / Distribution -->
+        <div class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs flex-wrap">
+          <span class="flex items-center gap-1 bg-pink-100 text-pink-700 px-2 py-1 rounded-lg font-bold">
+            <i class="fa-solid fa-graduation-cap"></i> أسئلة (16)
+          </span>
+          <span class="flex items-center gap-1 bg-amber-100 text-amber-800 px-2 py-1 rounded-lg font-bold">
+            <i class="fa-solid fa-gift"></i> هدايا (7)
+          </span>
+          <span class="flex items-center gap-1 bg-purple-100 text-purple-700 px-2 py-1 rounded-lg font-bold">
+            <i class="fa-solid fa-scroll"></i> أحكام (6)
+          </span>
+          <span class="flex items-center gap-1 bg-rose-100 text-rose-700 px-2 py-1 rounded-lg font-bold">
+            <i class="fa-solid fa-bomb"></i> فخاخ (7)
+          </span>
+        </div>
+      </div>
+
+      <!-- 6x6 Cards Grid -->
+      <div id="cardsGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 sm:gap-2.5 flex-grow">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. QUESTION MODAL -->
+  <div id="questionModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border-4 border-pink-300 max-w-lg w-full p-5 sm:p-6 transform transition-all text-center relative overflow-hidden">
+      <div class="w-14 h-14 mx-auto -mt-1 mb-2 bg-gradient-to-tr from-pink-500 to-rose-400 rounded-2xl flex items-center justify-center text-white text-2xl shadow-md">
+        <i class="fa-solid fa-brain"></i>
+      </div>
+      <div class="inline-block bg-pink-100 text-pink-700 text-xs px-3 py-1 rounded-full font-bold mb-2" id="qTopic">
+        Grammar & Vocabulary
+      </div>
+      <h3 id="qTitle" class="text-base sm:text-lg font-black text-slate-800 mb-1">تحدي المنهج الذكي</h3>
+      <p id="qArabic" class="text-xs text-slate-500 mb-3 font-semibold">اختر الإجابة الصحيحة لتحصل على قطعة من الدبدوب</p>
+
+      <!-- Sentence Prompt -->
+      <div class="bg-pink-50/70 border border-pink-200 rounded-2xl p-4 mb-4 text-center">
+        <p id="qPrompt" class="text-base sm:text-lg font-bold text-purple-900 font-fredoka tracking-wide" dir="ltr">
+          Question sentence will load here...
+        </p>
+      </div>
+
+      <!-- Multiple Choices -->
+      <div id="qOptions" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4" dir="ltr">
+        <!-- Options injected -->
+      </div>
+
+      <!-- Feedback -->
+      <div id="qFeedback" class="hidden text-xs sm:text-sm font-bold p-3 rounded-xl mb-3"></div>
+
+      <div class="flex justify-end gap-2">
+        <button id="qCloseBtn" onclick="closeModal('questionModal')" class="hidden w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-xl font-bold transition">
+          متابعة المغامرة ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. GIFT MODAL (Double chests, shields, bonus pieces) -->
+  <div id="giftModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border-4 border-amber-300 max-w-lg w-full p-5 sm:p-6 text-center relative overflow-hidden">
+      <div class="w-14 h-14 mx-auto -mt-1 mb-2 bg-gradient-to-tr from-amber-400 to-yellow-400 rounded-2xl flex items-center justify-center text-white text-2xl shadow-md animate-bounce">
+        <i class="fa-solid fa-gift"></i>
+      </div>
+      <div class="inline-block bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full font-bold mb-2">
+        هدية سحرية قيّمة 🎁
+      </div>
+      <h3 id="giftTitle" class="text-base sm:text-lg font-black text-amber-700 mb-2">مبروك! كارت مكافأة</h3>
+      <p id="giftDesc" class="text-xs sm:text-sm text-slate-600 mb-4 font-semibold leading-relaxed">
+        شرح محتوى الهدية
+      </p>
+
+      <!-- Two Chests Choice -->
+      <div id="giftInteractiveContainer" class="hidden mb-4">
+        <p class="text-xs text-purple-700 font-bold mb-2">اختاري أحد الصندوقين السحريين لتري حظكِ:</p>
+        <div class="grid grid-cols-2 gap-3" id="giftChests">
+          <button onclick="revealChest(1)" class="group bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-dashed border-amber-400 hover:border-amber-600 p-4 rounded-2xl flex flex-col items-center gap-1.5 hover:scale-105 transition shadow">
+            <span class="text-3xl group-hover:rotate-12 transition">📦</span>
+            <span class="text-xs font-bold text-amber-900">الصندوق الوردي</span>
+          </button>
+          <button onclick="revealChest(2)" class="group bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-dashed border-purple-400 hover:border-purple-600 p-4 rounded-2xl flex flex-col items-center gap-1.5 hover:scale-105 transition shadow">
+            <span class="text-3xl group-hover:-rotate-12 transition">✨</span>
+            <span class="text-xs font-bold text-purple-900">الصندوق الذهبي</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="giftActionArea">
+        <button id="giftClaimBtn" onclick="claimStandardGift()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 text-white font-bold py-3 rounded-2xl shadow-lg transition active:scale-95">
+          استلام المكافأة الآن ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TRAP MODAL (With rescue spelling challenges or shield protection) -->
+  <div id="trapModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border-4 border-rose-300 max-w-md w-full p-5 sm:p-6 text-center">
+      <div class="w-14 h-14 mx-auto mb-2 bg-gradient-to-tr from-rose-500 to-red-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-md">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div class="inline-block bg-rose-100 text-rose-700 text-xs px-3 py-1 rounded-full font-bold mb-2">
+        احترسي! كارت فخ ⚠️
+      </div>
+      <h3 id="trapTitle" class="text-base sm:text-lg font-black text-rose-600 mb-1">لقد وقعتِ في الفخ!</h3>
+      <p id="trapDesc" class="text-xs sm:text-sm text-slate-600 mb-4 font-semibold leading-relaxed">
+        شرح الفخ وتأثيره
+      </p>
+
+      <!-- Rescue Challenge Input Area -->
+      <div id="trapRescueArea" class="hidden mb-4 p-3 bg-rose-50 rounded-2xl border border-rose-200">
+        <p id="trapRescuePrompt" class="text-xs font-bold text-rose-800 mb-2">
+          أجيبي سريعاً لتفادي الفخ: اكتبي الكلمة بالإنجليزية!
+        </p>
+        <div class="flex gap-2">
+          <input type="text" id="trapRescueInput" placeholder="اكتبي الكلمة بالإنجليزية..." class="w-full text-center p-2 rounded-xl border border-rose-300 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 font-bold" dir="ltr">
+          <button onclick="checkTrapRescue()" class="bg-rose-500 hover:bg-rose-600 text-white px-3 sm:px-4 rounded-xl font-bold text-xs transition">تحقق</button>
+        </div>
+      </div>
+
+      <button id="trapCloseBtn" onclick="closeModal('trapModal')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-2xl shadow transition">
+        فهمت، استمرار المغامرة
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. EDUCATIONAL RULE / JUDGMENT MODAL (أحكام تعليمية ممتعة) -->
+  <div id="ruleModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border-4 border-purple-400 max-w-lg w-full p-5 sm:p-6 text-center">
+      <div class="w-14 h-14 mx-auto mb-2 bg-gradient-to-tr from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-md">
+        <i class="fa-solid fa-scroll"></i>
+      </div>
+      <div class="inline-block bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-bold mb-2">
+        حكم اللعبة التعليمي ⚖️
+      </div>
+      <h3 id="ruleTitle" class="text-base sm:text-lg font-black text-purple-800 mb-1">تحدي النطق والتطبيق</h3>
+      <p id="ruleDesc" class="text-xs sm:text-sm text-slate-600 mb-4 font-semibold leading-relaxed">
+        نص الحكم المطلوب تنفيذه
+      </p>
+
+      <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200 mb-4 text-right">
+        <p class="text-xs text-purple-900 font-bold mb-1 flex items-center gap-1.5">
+          <i class="fa-solid fa-microphone-lines"></i> المهمة المطلوبة بصوت واضح:
+        </p>
+        <p id="ruleTaskText" class="text-xs sm:text-sm text-purple-950 font-bold leading-relaxed">
+          نص المهمة
+        </p>
+      </div>
+
+      <button onclick="acceptRuleChallenge()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 text-white font-bold py-3 rounded-2xl shadow-lg transition active:scale-95">
+        أنجزت التحدي ببراعة! 🌟
+      </button>
+    </div>
+  </div>
+
+  <!-- 5. VICTORY CELEBRATION MODAL -->
+  <div id="winModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border-8 border-pink-300 max-w-md w-full p-6 text-center relative overflow-hidden animate-bounce">
+      <div class="text-6xl mb-2">🧸👑🎉</div>
+      <h2 class="text-2xl font-black text-pink-600 mb-1">مبروووك يا بطلة المملكة!</h2>
+      <h3 class="text-base font-bold text-purple-700 mb-3">اكتمل دبدوب لابوبو بالكامل بجميع أجزائه الـ 15!</h3>
+      <p class="text-xs sm:text-sm text-slate-600 mb-6 leading-relaxed font-semibold">
+        لقد أبدعتِ في مهارات وقواعد كتاب Top Goal 3 بنجاح باهر (Passive Voice, Conditionals, Present Perfect, Countable/Uncountable, Health & Instruments)!
+      </p>
+      <button onclick="resetGame()" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 text-white font-bold py-3 rounded-2xl shadow-lg transition">
+        بدء مغامرة جديدة 🔄
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // Web Audio Synthesizer (Zero External Dependencies)
+    const AudioFX = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) this.ctx = new AudioContextClass();
+        }
+      },
+      play(type) {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+          }
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          if (type === 'correct') {
+            // Bright cheerful ascending arpeggio
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now); // C5
+            osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+            osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+            osc.frequency.setValueAtTime(1046.50, now + 0.24); // C6
+            gain.gain.setValueAtTime(0.28, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+            osc.start(now);
+            osc.stop(now + 0.55);
+          } else if (type === 'wrong') {
+            // Disappointed buzzer
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(240, now);
+            osc.frequency.setValueAtTime(170, now + 0.15);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+            osc.start(now);
+            osc.stop(now + 0.38);
+          } else if (type === 'gift') {
+            // Shimmer harp
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, now);
+            osc.frequency.exponentialRampToValueAtTime(1174.66, now + 0.25);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+            osc.start(now);
+            osc.stop(now + 0.45);
+          } else if (type === 'win') {
+            // Fanfare chords
+            [0, 0.12, 0.24, 0.36, 0.52].forEach((delay, i) => {
+              const o = this.ctx.createOscillator();
+              const g = this.ctx.createGain();
+              o.connect(g);
+              g.connect(this.ctx.destination);
+              const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+              o.frequency.value = notes[i];
+              g.gain.setValueAtTime(0.22, now + delay);
+              g.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.35);
+              o.start(now + delay);
+              o.stop(now + delay + 0.35);
+            });
+          }
+        } catch (e) {
+          console.warn('AudioContext pending user click:', e);
+        }
+      }
+    };
+
+    // ==========================================
+    // 16 QUESTIONS DATABASE (Based on the attached book pages)
+    // - Countable & Uncountable (a few / a little)
+    // - Passive Voice (is/are + V3)
+    // - Zero & First Conditionals (If you rest, you will get better)
+    // - Present Perfect with since & for (played drums for 2 years / since February)
+    // - Health, Nutrition, Body Parts & Injuries
+    // - Musical Instruments & Food items
+    // ==========================================
+    const QUESTIONS_16 = [
+      {
+        id: "q1",
+        topic: "Countable vs Uncountable - صفحة 28",
+        arabic: "اختاري أداة المقدار المناسبة مع الزيتون (اسم جمع معدود):",
+        sentence: "Why don't we add ______ olives to the pizza?",
+        options: ["a few", "a little", "much", "an"],
+        correct: 0,
+        explanation: "نستخدم 'a few' مع الأسماء المعدودة مثل olives و strawberries، بينما 'a little' مع غير المعدود."
+      },
+      {
+        id: "q2",
+        topic: "Countable vs Uncountable - صفحة 28",
+        arabic: "اختاري أداة المقدار المناسبة مع الملح والفلفل (غير معدود):",
+        sentence: "Maybe we can add ______ salt and pepper to the soup.",
+        options: ["a few", "a little", "many", "these"],
+        correct: 1,
+        explanation: "الملح والفلفل أسماء غير معدودة (Uncountable) لذلك نستخدم معها 'a little'."
+      },
+      {
+        id: "q3",
+        topic: "Present Perfect (for vs since) - صفحة 35",
+        arabic: "اختاري الكلمة الصحيحة للمدة الزمنية المحددة (سنتان):",
+        sentence: "I have played the drums ______ two years.",
+        options: ["for", "since", "in", "at"],
+        correct: 0,
+        explanation: "نستخدم 'for' للتعبير عن طول المدة الزمنية (two years)، بينما 'since' لنقطة البداية المحددة."
+      },
+      {
+        id: "q4",
+        topic: "Present Perfect (since) - صفحة 35",
+        arabic: "اختاري الكلمة الصحيحة لتحديد بداية الوقت (شهر فبراير):",
+        sentence: "She has liked traditional music ______ February.",
+        options: ["for", "since", "on", "from"],
+        correct: 1,
+        explanation: "نستخدم 'since' لتحديد نقطة انطلاق الحدث مثل أسماء الشهور والسنوات (since February)."
+      },
+      {
+        id: "q5",
+        topic: "Passive Voice (المبني للمجهول) - صفحة 11",
+        arabic: "صيغة المبني للمجهول: ما الصيغة الصحيحة للجملة؟",
+        sentence: "Insects ______ by beetles and other animals in the wild.",
+        options: ["are eaten", "is eaten", "eat", "eats"],
+        correct: 0,
+        explanation: "الجمع Insects يأخذ are + التصريف الثالث eaten لتكوين المبني للمجهول (are eaten)."
+      },
+      {
+        id: "q6",
+        topic: "Passive Voice (Negative) - صفحة 11",
+        arabic: "نفي المبني للمجهول في المضارع:",
+        sentence: "Butterflies ______ seen in cold freezing seasons.",
+        options: ["isn't", "aren't", "don't", "doesn't"],
+        correct: 1,
+        explanation: "Butterflies اسم جمع، لذا نفي المبني للمجهول هو 'aren't seen'."
+      },
+      {
+        id: "q7",
+        topic: "First Conditional (الشرط الأول) - صفحة 30",
+        arabic: "الشرط الأول للمواقف المستقبلية المحتملة:",
+        sentence: "If you don't rest well, you ______ get better quickly.",
+        options: ["won't", "doesn't", "are", "have"],
+        correct: 0,
+        explanation: "جواب الشرط في الحالة الأولى يأتي مع will أو won't في النفي (won't get better)."
+      },
+      {
+        id: "q8",
+        topic: "Zero Conditional (الشرط الصفري) - صفحة 30",
+        arabic: "الشرط الصفري للحقائق الطبية العامة:",
+        sentence: "If patients rest well, they ______ better quickly.",
+        options: ["get", "will got", "got", "gets"],
+        correct: 0,
+        explanation: "في الشرط الصفري للحقائق العامة نستخدم المضارع البسيط في كلا الشقين: If patients rest, they get."
+      },
+      {
+        id: "q9",
+        topic: "Health & Nutrition - صفحة 8",
+        arabic: "مفردات المهن الصحية: من يقدم النصائح الغذائية؟",
+        sentence: "Doctor Garcia is a ______ who helps children eat healthy food.",
+        options: ["nutritionist", "dentist", "surgeon", "mechanic"],
+        correct: 0,
+        explanation: "nutritionist تعني أخصائية تغذية، وهي التي تقدم استشارات الأكل الصحي."
+      },
+      {
+        id: "q10",
+        topic: "Healthy Diet - صفحة 8",
+        arabic: "مفردات نمط الحياة الصحي:",
+        sentence: "Healthy people always eat a ______ diet full of vitamins.",
+        options: ["varied", "poor", "heavy", "bad"],
+        correct: 0,
+        explanation: "varied diet تعني نظام غذائي متنوّع ومتوازن."
+      },
+      {
+        id: "q11",
+        topic: "Body Parts & Injuries - صفحة 21",
+        arabic: "مفردات إصابات الجسم: ماذا حدث عند استخدام السكين؟",
+        sentence: "I was cutting bread with a knife and I hurt my ______.",
+        options: ["finger", "knee", "toe", "foot"],
+        correct: 0,
+        explanation: "استخدام السكين لتقطيع الخبز قد يجرح إصبع اليد (hurt my finger)."
+      },
+      {
+        id: "q12",
+        topic: "Pharmacy & First Aid - صفحة 21",
+        arabic: "مستلزمات الصيدلية والإسعافات:",
+        sentence: "If you cut your knee, you will need a ______ from the pharmacy.",
+        options: ["bandage", "drum", "typewriter", "camera"],
+        correct: 0,
+        explanation: "bandage تعني ضمادة طبية للجروح، وتباع في الصيدلية (pharmacy)."
+      },
+      {
+        id: "q13",
+        topic: "Musical Instruments - صفحة 34",
+        arabic: "الآلات الموسيقية: ما اسم الآلة الشرقية الشهيرة في الصورة؟",
+        sentence: "He loves traditional Arabian music and plays the ______.",
+        options: ["oud", "drums", "piano", "flute"],
+        correct: 0,
+        explanation: "العود (oud) آلة موسيقية تقليدية وتراثية عربية شهيرة."
+      },
+      {
+        id: "q14",
+        topic: "Musical Instruments - صفحة 34",
+        arabic: "الآلات الإيقاعية:",
+        sentence: "Faris can play the ______ in the music festival.",
+        options: ["drums", "sandwich", "bandage", "spoon"],
+        correct: 0,
+        explanation: "الطبول (drums) هي الآلة الإيقاعية المذكورة في الدرس."
+      },
+      {
+        id: "q15",
+        topic: "Kitchen Utensils & Food - صفحة 27",
+        arabic: "أدوات المائدة: ماذا نستخدم لتناول الحساء والحبوب؟",
+        sentence: "We use a ______ to eat soup and cereal.",
+        options: ["spoon", "fork", "knife", "plate"],
+        correct: 0,
+        explanation: "نستخدم الملعقة (spoon) لتناول الحساء وحبوب الإفطار."
+      },
+      {
+        id: "q16",
+        topic: "Animal Environments - مراجعة الوحدة صفحة 20",
+        arabic: "مفردات البيئات والحيوانات:",
+        sentence: "The camel has a hump and lives in very dry ______.",
+        options: ["environments", "swimming pools", "oceans", "kitchens"],
+        correct: 0,
+        explanation: "الجمل يعيش في بيئات جافة جداً في الصحراء (dry environments)."
+      }
+    ];
+
+    // ==========================================
+    // 7 REWARDS / GIFTS (هدايا تعليمية ومكاسب ذكية)
+    // ==========================================
+    const GIFTS_7 = [
+      {
+        id: "g1",
+        title: "قطعة فورية من دبدوب لابوبو! 🧸",
+        desc: "يا حظكِ الرائع! ربحتِ قطعة حرة مباشرة انضمت إلى دميتك بدون الحاجة لحل سؤال!",
+        actionType: "free_piece"
+      },
+      {
+        id: "g2",
+        title: "درع الحماية الذهبي 🛡️",
+        desc: "درع سحري متين يحميكِ تماماً من الفخ القادم ويمنع خسارة أي قطعة!",
+        actionType: "grant_shield"
+      },
+      {
+        id: "g3",
+        title: "صندوق الحظ المزدوج (اختاري كارت من اثنين) 🎁",
+        desc: "أمامك صندوقان سحريان: اختاري واحداً منهما لتكتشفي هديتكِ!",
+        actionType: "two_chests"
+      },
+      {
+        id: "g4",
+        title: "مضاعف القطع السحري (Double Puzzle) 🚀",
+        desc: "إجابتكِ الصحيحة على السؤال القادم ستمنحكِ قطعتين اثنتين بدلاً من قطعة واحدة!",
+        actionType: "double_next"
+      },
+      {
+        id: "g5",
+        title: "إلغاء فوري لجميع الأحكام! 🕊️",
+        desc: "عفو ملكي شامل! يتم إسقاط أي حكم نشط فوراً وتمنحين قطعة إضافية مكافأة على ذكائكِ!",
+        actionType: "clear_rule_and_piece"
+      },
+      {
+        id: "g6",
+        title: "تاج الأميرة الذهبي المباشر! 👑",
+        desc: "كنز فوري! تم تركيب تاج الأميرات الملكي المرصع بالجواهر فوق رأس الدبدوب مباشرة!",
+        actionType: "crown_piece"
+      },
+      {
+        id: "g7",
+        title: "جرعة الطاقة الذكية (تخطي + قطعة) 💡",
+        desc: "تمنحكِ هذه الهدية قطعة هدية وزيادة في المعنويات لمواصلة فتح باقي الكروت!",
+        actionType: "free_piece"
+      }
+    ];
+
+    // ==========================================
+    // 7 TRAPS (فخاخ مسلية مع تحديات نجاة سريعة)
+    // ==========================================
+    const TRAPS_7 = [
+      {
+        id: "t1",
+        title: "فخ الشفرة السرية للإصابات! 🩹",
+        desc: "كاد الفخ يسحب منك قطعة! انطقي أو اكتبي جمع كلمة 'Tooth' (أسنان) بالإنجليزية للنجاة!",
+        targetWord: "teeth",
+        prompt: "اكتبي جمع كلمة Tooth (سن) بالإنجليزية:"
+      },
+      {
+        id: "t2",
+        title: "فخ الرياح الشقية! 🌀",
+        desc: "هبت ريح قوية، إذا لم يكن معك درع حماية ستفقدين قطعة، إلا إذا كتبتِ معنى كلمة 'ركبة' بالإنجليزية!",
+        targetWord: "knee",
+        prompt: "اكتبي كلمة 'ركبة' بالإنجليزية (K...):"
+      },
+      {
+        id: "t3",
+        title: "فخ أخصائي التغذية المشاغب! 🥗",
+        desc: "طُلب منكِ شفرة النجاة: هل كلمة Milk معدودة أم غير معدودة؟",
+        targetWord: "uncountable",
+        prompt: "اكتبي كلمة (uncountable) لتثبتي معرفتك وتفادي الفخ:"
+      },
+      {
+        id: "t4",
+        title: "فخ النوم الهادئ للدبدوب! 😴",
+        desc: "الدبدوب نام فجأة! اكتبي كلمة 'Wake' لتوقظي الدبدوب فوراً وتواصلي المسير!",
+        targetWord: "wake",
+        prompt: "اكتبي كلمة Wake لتوقظيه سريعاً:"
+      },
+      {
+        id: "t5",
+        title: "فخ الآلات الموسيقية! 🎻",
+        desc: "توقفت الموسيقى فجأة! اكتبي اسم آلة 'الكمان' بالإنجليزية للهروب من الفخ!",
+        targetWord: "violin",
+        prompt: "اكتبي كلمة (violin) بالإنجليزية:"
+      },
+      {
+        id: "t6",
+        title: "فخ الفراشات المتجمدة! ❄️",
+        desc: "تجمدت إحدى الخطوات! اكتبي كلمة (cold) سريعاً لإذابة الجليد وتفادي الخسارة!",
+        targetWord: "cold",
+        prompt: "اكتبي كلمة (cold) لتخطي الفخ:"
+      },
+      {
+        id: "t7",
+        title: "فخ الملعقة الضائعة! 🥄",
+        desc: "أين ملعقة الحساء؟ اكتبي كلمة (spoon) بالإنجليزية للنجاة من تأثير الفخ!",
+        targetWord: "spoon",
+        prompt: "اكتبي كلمة (spoon) بالإنجليزية:"
+      }
+    ];
+
+    // ==========================================
+    // 6 EDUCATIONAL JUDGMENTS / RULES (أحكام تعليمية)
+    // ==========================================
+    const RULES_6 = [
+      {
+        id: "r1",
+        title: "حكم أجزاء الجسم! 🦵",
+        desc: "حكم تعليمي ممتع: صفي 3 أجزاء من جسمك باللغة الإنجليزية بصوت واضح!",
+        task: "قولي بصوت مسموع: Knee (ركبة), Finger (إصبع), Elbow (مرفق)!"
+      },
+      {
+        id: "r2",
+        title: "حكم الأطعمة المعدودة وغير المعدودة! 🍓",
+        desc: "اذكري مثالين لأسماء معدودة ومثالين لغير المعدودة من درس Top Goal 3!",
+        task: "قولي: 'Countable: bananas, olives' و 'Uncountable: milk, salt'!"
+      },
+      {
+        id: "r3",
+        title: "حكم العزف الموسيقي! 🥁",
+        desc: "مثّلي أنكِ تعزفين على آلة موسيقية وانطقي جملة المضارع التام كاملة!",
+        task: "انطقي بثقة: 'I have played the drums for two years!'"
+      },
+      {
+        id: "r4",
+        title: "حكم نصيحة الطبيب! 🩺",
+        desc: "انطقي جملة الشرط الأولى كأنكِ طبيبة ماهرة تقدم نصيحة لمريض:",
+        task: "انطقي: 'If you rest well, you will get better soon!'"
+      },
+      {
+        id: "r5",
+        title: "حكم حيوان الصحراء (الجمل)! 🐪",
+        desc: "صفي الجمل بجملة واحدة باللغة الإنجليزية من مراجعة الوحدة:",
+        task: "قولي: 'The camel has a hump and lives in dry environments!'"
+      },
+      {
+        id: "r6",
+        title: "حكم الإملاء السريع لأدوات المطبخ! 🍽️",
+        desc: "انطقي أسماء 3 أدوات من المطبخ باللغة الإنجليزية بصوت جميل:",
+        task: "انطقي: 'Spoon (ملعقة), Fork (شوكة), Knife (سكين)'!"
+      }
+    ];
+
+    // Global Game Variables
+    let cardsDeck = [];
+    const unlockedPieces = new Set();
+    let hasShield = false;
+    let pendingRule = null;
+    let doubleNextPiece = false;
+    let activeCardIndex = null;
+    const TOTAL_PIECES = 15;
+
+    // Build the 36-card deck (16 questions + 7 gifts + 7 traps + 6 rules = 36 cards)
+    function buildCardsDeck() {
+      const deck = [];
+
+      // 16 Questions
+      QUESTIONS_16.forEach((q, i) => {
+        deck.push({
+          type: 'question',
+          icon: 'fa-graduation-cap',
+          badgeText: 'سؤال',
+          data: q,
+          opened: false
+        });
+      });
+
+      // 7 Gifts
+      GIFTS_7.forEach((g, i) => {
+        deck.push({
+          type: 'gift',
+          icon: 'fa-gift',
+          badgeText: 'هدية',
+          data: g,
+          opened: false
+        });
+      });
+
+      // 7 Traps
+      TRAPS_7.forEach((t, i) => {
+        deck.push({
+          type: 'trap',
+          icon: 'fa-bomb',
+          badgeText: 'فخ',
+          data: t,
+          opened: false
+        });
+      });
+
+      // 6 Rules
+      RULES_6.forEach((r, i) => {
+        deck.push({
+          type: 'rule',
+          icon: 'fa-scroll',
+          badgeText: 'حكم',
+          data: r,
+          opened: false
+        });
+      });
+
+      // Fisher-Yates Shuffle
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+
+      return deck;
+    }
+
+    // Render Cards in 6x6 Grid
+    function renderBoard() {
+      const grid = document.getElementById('cardsGrid');
+      grid.innerHTML = '';
+
+      cardsDeck.forEach((card, idx) => {
+        const cardBox = document.createElement('div');
+        cardBox.className = 'card-scene aspect-[3/4] cursor-pointer';
+
+        cardBox.innerHTML = `
+          <div id="card-inner-${idx}" class="card-object shadow-sm hover:shadow-md rounded-2xl ${card.opened ? 'card-flipped cursor-default pointer-events-none' : ''}">
+            
+            <!-- Card Front (Mystery Back of the Card) -->
+            <div class="card-side bg-gradient-to-br from-pink-400 via-rose-400 to-purple-500 text-white flex flex-col items-center justify-between p-2 border-2 border-white/80 shadow">
+              <div class="w-full flex justify-between items-center text-[10px] opacity-80 font-fredoka">
+                <span>#${idx + 1}</span>
+                <i class="fa-solid fa-sparkles text-[9px]"></i>
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="text-xl sm:text-2xl filter drop-shadow">🧸</span>
+                <span class="text-[10px] font-bold tracking-wider mt-0.5 text-pink-100">Top Goal</span>
+              </div>
+              <div class="w-full bg-white/20 backdrop-blur-xs py-0.5 rounded-full text-center text-[8px] font-bold">
+                المسي ✨
+              </div>
+            </div>
+
+            <!-- Card Back (Revealed Content) -->
+            <div class="card-side card-back bg-white border-2 flex flex-col items-center justify-between p-1.5 sm:p-2 text-center shadow-lg ${
+              card.type === 'question' ? 'border-pink-300 text-pink-700' :
+              card.type === 'gift' ? 'border-amber-300 text-amber-700 bg-amber-50/50' :
+              card.type === 'rule' ? 'border-purple-300 text-purple-700 bg-purple-50/50' :
+              'border-rose-300 text-rose-700 bg-rose-50/50'
+            }">
+              <div class="w-full flex justify-between items-center text-[9px] font-bold">
+                <span>#${idx + 1}</span>
+                <span class="px-1 py-0.5 rounded text-[8px] ${
+                  card.type === 'question' ? 'bg-pink-100 text-pink-700' :
+                  card.type === 'gift' ? 'bg-amber-100 text-amber-800' :
+                  card.type === 'rule' ? 'bg-purple-100 text-purple-800' :
+                  'bg-rose-100 text-rose-800'
+                }">${card.badgeText}</span>
+              </div>
+              <div class="text-lg sm:text-xl">
+                <i class="fa-solid ${card.icon}"></i>
+              </div>
+              <div class="text-[9px] sm:text-[10px] font-bold truncate max-w-full">
+                ${card.type === 'question' ? 'سؤال دراسي' : card.data.title.substring(0, 12)}
+              </div>
+            </div>
+
+          </div>
+        `;
+
+        if (!card.opened) {
+          cardBox.addEventListener('click', () => handleCardClick(idx));
+        }
+
+        grid.appendChild(cardBox);
+      });
+
+      updateStatsUI();
+    }
+
+    // Card Click Handler
+    function handleCardClick(index) {
+      const card = cardsDeck[index];
+      if (card.opened) return;
+
+      activeCardIndex = index;
+      AudioFX.init();
+
+      const cardInner = document.getElementById(`card-inner-${index}`);
+      if (cardInner) {
+        cardInner.classList.add('card-flipped');
+      }
+      card.opened = true;
+
+      setTimeout(() => {
+        if (card.type === 'question') {
+          openQuestionModal(card.data);
+        } else if (card.type === 'gift') {
+          openGiftModal(card.data);
+        } else if (card.type === 'trap') {
+          openTrapModal(card.data);
+        } else if (card.type === 'rule') {
+          openRuleModal(card.data);
+        }
+      }, 350);
+    }
+
+    // Question Modal Logic
+    let currentQuestion = null;
+    function openQuestionModal(qData) {
+      currentQuestion = qData;
+      document.getElementById('qTopic').textContent = qData.topic;
+      document.getElementById('qArabic').textContent = qData.arabic;
+      document.getElementById('qPrompt').textContent = qData.sentence;
+
+      const optsContainer = document.getElementById('qOptions');
+      optsContainer.innerHTML = '';
+
+      const feedback = document.getElementById('qFeedback');
+      feedback.className = 'hidden text-xs sm:text-sm font-bold p-3 rounded-xl mb-3';
+      document.getElementById('qCloseBtn').classList.add('hidden');
+
+      qData.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn bg-pink-50 hover:bg-pink-100 active:scale-95 border-2 border-pink-200 text-pink-900 font-bold py-2.5 px-3 rounded-xl text-sm transition flex items-center justify-between';
+        btn.innerHTML = `
+          <span>${String.fromCharCode(65 + i)}. ${opt}</span>
+          <i class="fa-regular fa-circle text-pink-300"></i>
+        `;
+        btn.onclick = () => checkAnswer(i, btn);
+        optsContainer.appendChild(btn);
+      });
+
+      showModal('questionModal');
+    }
+
+    function checkAnswer(chosenIndex, btnElement) {
+      const q = currentQuestion;
+      const opts = document.querySelectorAll('.option-btn');
+      opts.forEach(b => b.classList.add('pointer-events-none'));
+
+      const feedback = document.getElementById('qFeedback');
+      feedback.classList.remove('hidden');
+
+      if (chosenIndex === q.correct) {
+        AudioFX.play('correct');
+        btnElement.classList.remove('bg-pink-50', 'border-pink-200');
+        btnElement.classList.add('bg-emerald-500', 'border-emerald-600', 'text-white');
+        btnElement.querySelector('i').className = 'fa-solid fa-circle-check text-white';
+
+        feedback.className = 'text-xs sm:text-sm font-bold p-3 rounded-xl mb-3 bg-emerald-100 text-emerald-800 border border-emerald-300';
+        feedback.innerHTML = `🌟 إجابة ممتازة وذكية جداً! <br><span class="text-xs font-semibold">${q.explanation}</span>`;
+
+        let piecesEarned = 1;
+        if (doubleNextPiece) {
+          piecesEarned = 2;
+          doubleNextPiece = false;
+          showNotification('تم تطبيق مضاعف القطع! حصلتِ على قطعتين! 🚀');
+        }
+
+        for (let k = 0; k < piecesEarned; k++) {
+          addTeddyPiece();
+        }
+
+        if (pendingRule) {
+          pendingRule = null;
+          showNotification('تم تجاوز الحكم التعليمي بنجاح بفضل إجابتكِ الرائعة! 🎓');
+        }
+      } else {
+        AudioFX.play('wrong');
+        btnElement.classList.remove('bg-pink-50', 'border-pink-200');
+        btnElement.classList.add('bg-rose-500', 'border-rose-600', 'text-white');
+        btnElement.querySelector('i').className = 'fa-solid fa-circle-xmark text-white';
+
+        opts[q.correct].classList.remove('bg-pink-50');
+        opts[q.correct].classList.add('bg-emerald-100', 'border-emerald-400', 'text-emerald-900');
+
+        feedback.className = 'text-xs sm:text-sm font-bold p-3 rounded-xl mb-3 bg-rose-100 text-rose-800 border border-rose-300';
+        feedback.innerHTML = `حاولي أكثر في السؤال القادم! الإجابة الصحيحة هي: <strong>${q.options[q.correct]}</strong><br><span class="text-xs font-semibold">${q.explanation}</span>`;
+      }
+
+      document.getElementById('qCloseBtn').classList.remove('hidden');
+    }
+
+    // Gift Modal Logic
+    let currentGift = null;
+    function openGiftModal(gift) {
+      currentGift = gift;
+      AudioFX.play('gift');
+
+      document.getElementById('giftTitle').textContent = gift.title;
+      document.getElementById('giftDesc').textContent = gift.desc;
+
+      const interactiveContainer = document.getElementById('giftInteractiveContainer');
+      const actionArea = document.getElementById('giftActionArea');
+
+      if (gift.actionType === 'two_chests') {
+        interactiveContainer.classList.remove('hidden');
+        actionArea.classList.add('hidden');
+      } else {
+        interactiveContainer.classList.add('hidden');
+        actionArea.classList.remove('hidden');
+      }
+
+      showModal('giftModal');
+    }
+
+    function revealChest(choice) {
+      AudioFX.play('gift');
+      closeModal('giftModal');
+      if (choice === 1) {
+        addTeddyPiece();
+        showNotification('مبروك! الصندوق الوردي منحك قطعة مجانية من الدبدوب! 🧸💖');
+      } else {
+        hasShield = true;
+        showNotification('رائع! الصندوق الذهبي منحك درع الحماية الذهبي! 🛡️');
+      }
+      updateStatsUI();
+    }
+
+    function claimStandardGift() {
+      if (!currentGift) return;
+      const type = currentGift.actionType;
+
+      if (type === 'free_piece') {
+        addTeddyPiece();
+        showNotification('مبروك! انضمت قطعة جديدة للدمية الجميلة! 🧸');
+      } else if (type === 'grant_shield') {
+        hasShield = true;
+        showNotification('تم تفعيل درع الحماية الذهبي ضد الفخاخ! 🛡️');
+      } else if (type === 'double_next') {
+        doubleNextPiece = true;
+        showNotification('تم تفعيل مضاعف القطع للسؤال القادم! 🚀');
+      } else if (type === 'clear_rule_and_piece') {
+        pendingRule = null;
+        addTeddyPiece();
+        showNotification('تم إسقاط جميع الأحكام وحصلتِ على قطعة إضافية! 🕊️');
+      } else if (type === 'crown_piece') {
+        unlockSpecificPiece(15);
+        showNotification('تم تركيب تاج الأميرات الملكي فوق رأس الدبدوب! 👑');
+      }
+
+      closeModal('giftModal');
+      updateStatsUI();
+    }
+
+    // Trap Modal Logic
+    let currentTrap = null;
+    function openTrapModal(trap) {
+      currentTrap = trap;
+      AudioFX.play('wrong');
+
+      document.getElementById('trapTitle').textContent = trap.title;
+      document.getElementById('trapDesc').textContent = trap.desc;
+      const rescueArea = document.getElementById('trapRescueArea');
+
+      // Check Shield Protection First!
+      if (hasShield) {
+        hasShield = false;
+        document.getElementById('trapDesc').innerHTML = `
+          <span class="text-emerald-700 font-bold">🛡️ درع الحماية الذهبي حماكِ من هذا الفخ! تم استهلاك الدرع بنجاح دون فقدان أي قطعة.</span>
+        `;
+        rescueArea.classList.add('hidden');
+        updateStatsUI();
+        showModal('trapModal');
+        return;
+      }
+
+      // Display rescue question
+      rescueArea.classList.remove('hidden');
+      document.getElementById('trapRescuePrompt').textContent = trap.prompt;
+      document.getElementById('trapRescueInput').value = '';
+
+      showModal('trapModal');
+    }
+
+    function checkTrapRescue() {
+      if (!currentTrap) return;
+      const val = document.getElementById('trapRescueInput').value.trim().toLowerCase();
+      if (val === currentTrap.targetWord.toLowerCase()) {
+        AudioFX.play('correct');
+        showNotification('إجابة إنقاذ صحيحة ومذهلة! تم تخطي الفخ بسلام! 🏃‍♀️✨');
+        closeModal('trapModal');
+      } else {
+        AudioFX.play('wrong');
+        showNotification(`إجابة غير صحيحة! الكلمة المطلوبة: ${currentTrap.targetWord}`);
+        removeTeddyPiece();
+        closeModal('trapModal');
+      }
+    }
+
+    // Rule Modal Logic
+    let currentRule = null;
+    function openRuleModal(rule) {
+      currentRule = rule;
+      AudioFX.play('gift');
+
+      document.getElementById('ruleTitle').textContent = rule.title;
+      document.getElementById('ruleDesc').textContent = rule.desc;
+      document.getElementById('ruleTaskText').textContent = rule.task;
+
+      showModal('ruleModal');
+    }
+
+    function acceptRuleChallenge() {
+      AudioFX.play('correct');
+      showNotification('رائعة جداً! تم تنفيذ الحكم التعليمي بنجاح 🌟');
+      closeModal('ruleModal');
+      updateStatsUI();
+    }
+
+    // ==========================================
+    // TEDDY BEAR 15-PIECE PUZZLE ENGINE
+    // ==========================================
+    function addTeddyPiece() {
+      if (unlockedPieces.size >= TOTAL_PIECES) return;
+
+      for (let i = 1; i <= TOTAL_PIECES; i++) {
+        if (!unlockedPieces.has(i)) {
+          unlockSpecificPiece(i);
+          break;
+        }
+      }
+    }
+
+    function unlockSpecificPiece(pieceNum) {
+      if (unlockedPieces.has(pieceNum)) return;
+      unlockedPieces.add(pieceNum);
+
+      const pieceEl = document.getElementById(`part-${pieceNum}`);
+      const labelEl = document.getElementById(`label-${pieceNum}`);
+
+      if (pieceEl) {
+        pieceEl.classList.remove('piece-locked');
+        pieceEl.classList.add('piece-unlocked');
+        pieceEl.style.transform = 'scale(1.08)';
+        setTimeout(() => {
+          pieceEl.style.transform = 'scale(1)';
+        }, 500);
+      }
+      if (labelEl) {
+        labelEl.style.opacity = '0';
+      }
+
+      updateStatsUI();
+
+      if (unlockedPieces.size >= TOTAL_PIECES) {
+        setTimeout(handleVictory, 600);
+      }
+    }
+
+    function removeTeddyPiece() {
+      if (unlockedPieces.size === 0) return;
+      let highest = 0;
+      unlockedPieces.forEach(n => { if (n > highest) highest = n; });
+      if (highest > 0) {
+        unlockedPieces.delete(highest);
+        const pieceEl = document.getElementById(`part-${highest}`);
+        const labelEl = document.getElementById(`label-${highest}`);
+        if (pieceEl) {
+          pieceEl.classList.remove('piece-unlocked');
+          pieceEl.classList.add('piece-locked');
+        }
+        if (labelEl) {
+          labelEl.style.opacity = '1';
+        }
+        showNotification(`أوبس! تم فقدان القطعة رقم ${highest}! 💔`);
+        updateStatsUI();
+      }
+    }
+
+    function updateStatsUI() {
+      const count = unlockedPieces.size;
+      document.getElementById('piecesCount').textContent = count;
+
+      const pct = Math.round((count / TOTAL_PIECES) * 100);
+      document.getElementById('progressPercent').textContent = `${pct}% مكتمل`;
+      document.getElementById('puzzleProgressBar').style.width = `${pct}%`;
+
+      const shieldBadge = document.getElementById('shieldBadge');
+      if (hasShield) {
+        shieldBadge.classList.remove('hidden');
+        shieldBadge.classList.add('flex');
+      } else {
+        shieldBadge.classList.add('hidden');
+        shieldBadge.classList.remove('flex');
+      }
+
+      const ruleBadge = document.getElementById('ruleBadge');
+      if (pendingRule) {
+        ruleBadge.classList.remove('hidden');
+        ruleBadge.classList.add('flex');
+      } else {
+        ruleBadge.classList.add('hidden');
+        ruleBadge.classList.remove('flex');
+      }
+
+      const hint = document.getElementById('puzzleHint');
+      if (count === 0) {
+        hint.innerHTML = '✨ افتحي الكروت لكسب قطع الدبدوب وتفادي الفخاخ!';
+      } else if (count < 7) {
+        hint.innerHTML = `🧸 بداية رائعة! جَمَعْتِ ${count} من 15 قطعة. تابعي يا بطلة!`;
+      } else if (count < 14) {
+        hint.innerHTML = `💖 مذهل! بدأ دبدوب لابوبو يكتمل بوضوح (${count}/15 قطعة)!`;
+      } else if (count === 14) {
+        hint.innerHTML = '🔥 قطعة واحدة متبقية ويكتمل الدبدوب وتفوزين باللعبة!';
+      } else {
+        hint.innerHTML = '🎉 واااو! دبدوب لابوبو كامل وبأبهى حلة! ألف مبروك الفوز!';
+      }
+    }
+
+    // Victory Celebration
+    function handleVictory() {
+      AudioFX.play('win');
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 160,
+          spread: 90,
+          origin: { y: 0.6 }
+        });
+        setTimeout(() => {
+          confetti({
+            particleCount: 100,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 }
+          });
+          confetti({
+            particleCount: 100,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 }
+          });
+        }, 300);
+      }
+      showModal('winModal');
+    }
+
+    // Reset Game State
+    function resetGame() {
+      closeModal('questionModal');
+      closeModal('giftModal');
+      closeModal('trapModal');
+      closeModal('ruleModal');
+      closeModal('winModal');
+
+      unlockedPieces.clear();
+      hasShield = false;
+      pendingRule = null;
+      doubleNextPiece = false;
+      activeCardIndex = null;
+
+      for (let i = 1; i <= TOTAL_PIECES; i++) {
+        const p = document.getElementById(`part-${i}`);
+        const l = document.getElementById(`label-${i}`);
+        if (p) {
+          p.classList.remove('piece-unlocked');
+          p.classList.add('piece-locked');
+          p.style.transform = 'scale(1)';
+        }
+        if (l) {
+          l.style.opacity = '1';
+        }
+      }
+
+      cardsDeck = buildCardsDeck();
+      renderBoard();
+      showNotification('تم بدء جولة جديدة بحماس! بالتوفيق يا بطلة 🌸');
+    }
+
+    // Modal Helpers
+    function showModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // Toast Notification
+    function showNotification(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-slate-900/90 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-2xl shadow-2xl z-50 transition duration-300 pointer-events-none flex items-center gap-2 border border-pink-400';
+      toast.innerHTML = `<span>✨</span><span>${msg}</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 2600);
+    }
+
+    // Initialize on load
+    window.onload = function () {
+      cardsDeck = buildCardsDeck();
+      renderBoard();
+    };
+  </script>
+</body>
+</html>
